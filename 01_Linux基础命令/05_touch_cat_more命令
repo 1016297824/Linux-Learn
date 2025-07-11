@@ -1,0 +1,6 @@
+// touch,cat,more命令
+
+1.命令及语法
+(1)touch:touch [路径] 创建文件
+(2)cat:cat [路径] 查看文件
+(3)more:more [路径] 查看文件（可以翻页），空格翻页，q退出

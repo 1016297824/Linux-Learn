@@ -1,0 +1,6 @@
+// mkdir命令：mkdir [-p] [路径]
+
+1.mkdir:创建新目录（Make Directory）
+
+2.选项：
+(1)-p:自动创建不存在的父目录
