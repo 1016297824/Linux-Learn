@@ -1,0 +1,9 @@
+// cd命令：cd [路径]
+// pwd命令
+
+1.cd：更改路径（Change Directory）
+  pwd：查看当前目录（Print Work Directory）
+
+2.无需选项，只有参数
+
+3.不写cd参数则回到home目录
