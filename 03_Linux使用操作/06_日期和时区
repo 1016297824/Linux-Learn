@@ -1,0 +1,18 @@
+// 日期和时区
+
+1.date命令：查看系统时间
+(1)语法：date [-d] [+格式化字符串]
+(2)选项：
+    1)-d:按照给定的字符串像是日期
+
+2.修改Linux时区
+    sudo rm -f /etc/localtime
+    sudo ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+3.使用ntp自动校准时间
+(1)安装ntp：yum -y install ntp
+(2)启动并设置开机自启
+    systemctl start ntpd
+    systemctl enable ntpd
+(3)也能手动校准
+    ntpdate -u ntp.aliyun.com

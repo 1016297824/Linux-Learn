@@ -1,0 +1,13 @@
+// yum使用
+
+1.简介
+    yum是RPM包软件管理器，用于自动化安装配置Linux软件，并可以自动解决依赖问题
+    常用语CentOS等系统
+
+2.语法：yum [-y] [install | remove | search] [软件名称]
+(1)选项：
+    1)-y:自动确认，无需手动确认安装或卸载
+(2)参数
+    1)install:安装
+    2)remove:卸载
+    3)search:查询

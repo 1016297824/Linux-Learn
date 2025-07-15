@@ -1,0 +1,11 @@
+// systemctl命令
+
+1.systemctl命令:控制部分软件/服务（内置或第三方）的 启动、停止、开启自启
+
+2.语法：systemctl [start | stop | status | enable | disable] [软件/服务名]
+(1)参数：
+    1)start:启动
+    2)stop:停止
+    3)status:查看状态
+    4)enable:开机自启
+    5)disable:关闭开机自启
