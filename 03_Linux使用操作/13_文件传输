@@ -1,0 +1,7 @@
+// 文件传输
+
+1.rz/sz命令：rz上传文件，sz下载文件
+(1)下载：yum -y install lrzsz
+(2)语法
+    1)rz
+    2)sz [文件名]

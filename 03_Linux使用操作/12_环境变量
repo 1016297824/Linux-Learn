@@ -1,0 +1,19 @@
+// 环境变量
+
+1.env命令：查看环境变量
+
+2."$"符：用于取得“变量”的值
+例子：
+    echo $PATH
+    echo ${PATH}ABC
+
+3.临时设置环境变量
+    export 变量名=变量值
+
+4.修改当前用户的环境变量
+(1)编辑：vim ~/.bashrc
+(2)加载：source .bashrc
+
+5.修改所有用户的环境变量
+(1)编辑：vim /etc/profile
+(2)加载：source /etc/profile
