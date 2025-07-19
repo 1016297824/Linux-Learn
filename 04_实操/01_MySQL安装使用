@@ -84,3 +84,47 @@
         GRANT ALL PRIVILEGES ON *.* TO '用户名'@'IP地址';
     5)为用户赋予指定数据库的全部权限：
         GRANT ALL PRIVILEGES ON 数据库名.* TO '用户名'@'IP地址';
+
+3.MySQL5.7在Ubuntu系统安装
+(1)下载apt仓库：
+    wget https://dev.mysql.com/get/mysql-apt-config_0.8.12-1_all.deb
+(2)配置apt仓库：
+    dpkg -i mysql-apt-config_0.8.12-1_all.deb
+    步骤：
+    1)弹出框中选择：ubuntu bionic
+    2)弹出框中选择：MySQL Server & Cluster
+    3)弹出框中选择：mysql-5.7
+    4)最后选择：ok
+(3)更新apt仓库信息：
+    1)导入仓库的密钥信息：
+        apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 467B942D3A79BD29
+        报错使用-> apt-key adv --keyserver keyserver.ubuntu.com --recv-keys [提示的秘钥]
+                    apt-key adv --keyserver keyserver.ubuntu.com --recv-keys [B7B3B788A8D3785C]
+    2)更新apt仓库信息：
+        apt update
+(4)检查是否成功配置MySQL5.7的仓库:
+    apt-cache policy mysql-server
+(5)安装MySQL5.7：
+    apt install -f -y mysql-client=5.7.* mysql-community-server=5.7.*
+(6)启动MySQL：
+    1)启动：
+        /etc/init.d/mysql start
+    2)停止：
+        /etc/init.d/mysql stop 
+    3)查看状态：
+        /etc/init.d/mysql status
+(7)对MySQL进行初始化：
+    1)初始化命令：
+        mysql_secure_installation
+    2)输入密码
+    3)是否开启密码验证插件，如果需要增强密码安全性，输入y并回车，不需要直接回车（不推荐开启）
+    4)是否更改root密码，需要输入y回车，不需要直接回车（不推荐更改）
+    5)是否移除匿名用户，移除输入y回车，不移除直接回车（推荐移除）
+    6)是否禁止root用户远程登录，禁止输入y回车，不禁止直接回车（不推荐禁止）
+    7)是否移除自带的测试数据库，移除输入y回车，不移除直接回车（不推荐移除）
+    8)是否刷新权限，刷新输入y回车，不刷新直接回车（推荐刷新）
+(8)卸载5.7仓库信息：
+    1)卸载命令：
+        dpkg -l | grep mysql | awk '{print $2}' | xargs dpkg -P
+    2)更新apt仓库信息：
+        apt update

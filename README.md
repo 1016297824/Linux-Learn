@@ -18,3 +18,32 @@ SELECT User,Host FROM mysql.user;
     yum remove mysql57-community-release
 (3)清理缓存：
     yum clean all
+
+3.关于Ubuntu24无法安装MySQL5.7解决：
+(1)安装libtinfo5依赖：
+    1)sudo apt update
+    2)wget http://security.ubuntu.com/ubuntu/pool/universe/n/ncurses/libtinfo5_6.3-2ubuntu0.1_amd64.deb
+    3)sudo apt install ./libtinfo5_6.3-2ubuntu0.1_amd64.deb
+(2)安装libaio1和libaio-dev依赖：
+    1)curl -O http://launchpadlibrarian.net/646633572/libaio1_0.3.113-4_amd64.deb
+    2)sudo dpkg -i libaio1_0.3.113-4_amd64.deb
+    3)sudo apt-get install libaio-dev
+(3)以安装mysql 5.7.23为例：
+    1)创建目录并进入：
+        mkdir -p /opt/mysql && cd /opt/mysql
+    2)下载压缩包
+        wget https://downloads.mysql.com/archives/get/p/23/file/mysql-server_5.7.23-1ubuntu18.04_amd64.deb-bundle.tar
+    3)解压：
+        tar xvf ./mysql-server_5.7.23-1ubuntu18.04_amd64.deb-bundle.tar
+    4)安装./libmysql*：
+        sudo apt-get install ./libmysql*
+    5)安装客户端1：
+        sudo apt-get install ./mysql-community-client_5.7.23-1ubuntu18.04_amd64.deb
+    6)安装客户端2：
+        sudo apt-get install ./mysql-client_5.7.23-1ubuntu18.04_amd64.deb
+    7)安装服务端1：
+        sudo apt-get install ./mysql-community-server_5.7.23-1ubuntu18.04_amd64.deb
+    8)安装服务端2：
+        sudo apt-get install ./mysql-server_5.7.23-1ubuntu18.04_amd64.deb
+(4)参考：
+    https://www.yunieebk.com/mysql5_7_23/
