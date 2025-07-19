@@ -47,3 +47,15 @@ SELECT User,Host FROM mysql.user;
         sudo apt-get install ./mysql-server_5.7.23-1ubuntu18.04_amd64.deb
 (4)参考：
     https://www.yunieebk.com/mysql5_7_23/
+
+4.Linux虚拟机扩容：
+(1)安装工具：
+    sudo apt-get install gparted
+(2)启动工具：
+    sudo gparted
+(3)遇到读写权限问题：
+    1)查看挂载目录：挂载于/mounted on 后的内容，一般为两个
+    2)重新挂载（具体路径看挂载目录）：
+        sudo -i
+        mount -o remount -rw /
+        mount -o remount -rw /var/snap/firefox/common/host-hunspell
