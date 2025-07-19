@@ -1,0 +1,86 @@
+// MySQL安装使用
+
+1.MySQL5.7在CentOS系统安装：
+(1)配置yum仓库
+    1)更新秘钥：
+        rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    2)安装MySQL的yum仓库：
+        rpm -Uvh http://repo.mysql.com//mysql57-community-release-el7-7.noarch.rpm
+
+(2)通过yum安装MySQL
+    yum -y install mysql-community-server
+
+(3)启动MySQL并配置开机自启
+    1)启动：
+        systemctl start mysqld
+    2)开机自启：
+        systemctl enable mysqld
+
+(4)获取MySQL初始密码：
+    cat /var/log/mysqld.log | grep "temporary password"
+
+(5)登录MySQL数据库：
+    mysql -u -p
+    1)-u:登录用户
+    2)-p:密码登录
+
+(6)修改root用户密码：
+    ALTER USER 'root'@'localhost' IDENTIFIED BY '密码';
+
+(7)可以给root用户配置简单密码
+    1)设置密码安全级别低：
+        set global validate_password_policy=LOW;
+    2)设置密码长度6位：
+        set global validate_password_length=6;
+
+(8)配置root远程登录：
+    1)授权远程登录：
+        grant all privileges on *.* to root@"IP地址" identified by '密码' with grant option;  
+    2)刷新生效：
+        flush privileges;
+
+
+1.MySQL8.0在CentOS系统安装：
+(1)配置yum仓库
+    1)更新秘钥：
+        rpm --import https://repo.mysql.com/RPM-GPG-KEY-mysql-2022
+    2)安装MySQL的yum仓库：
+        rpm -Uvh http://repo.mysql.com//mysql80-community-release-el7-2.noarch.rpm
+
+(2)通过yum安装MySQL
+    yum -y install mysql-community-server
+
+(3)启动MySQL并配置开机自启
+    1)启动：
+        systemctl start mysqld
+    2)开机自启：
+        systemctl enable mysqld
+
+(4)获取MySQL初始密码：
+    cat /var/log/mysqld.log | grep "temporary password"
+
+(5)登录MySQL数据库：
+    mysql -u -p
+    1)-u:登录用户
+    2)-p:密码登录
+
+(6)修改root用户密码：
+    ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '密码'; 
+
+(7)可以给root用户配置简单密码
+    1)设置密码安全级别低：
+        set global validate_password.policy=0;
+    2)设置密码长度6位：
+        set global validate_password.length=6;
+
+(8)配置root远程登录：
+    1)授权远程登录：
+        create user '用户名'@'IP地址' IDENTIFIED WITH mysql_native_password BY '密码';  
+    2)刷新生效：
+        flush privileges;
+    3)后续修改密码：
+        ALTER USER '用户名'@'IP地址' IDENTIFIED WITH mysql_native_password BY '密码';
+    4)为用户赋予所有数据库和表的全部权限：
+        GRANT ALL PRIVILEGES ON *.* TO '用户名'@'IP地址';
+    5)为用户赋予指定数据库的全部权限：
+        GRANT ALL PRIVILEGES ON 数据库名.* TO '用户名'@'IP地址';
