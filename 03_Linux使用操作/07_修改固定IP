@@ -3,7 +3,7 @@
 1.打开文件
     vim /etc/sysconfig/network-scripts/ifcfg-ens33
 
-2.写入内容
+2.写入内容（以19+2.168.187.139为例）
 (1)BOOTPROTO:"dhcp"->"static"
 (1)IP地址：IPADDR="192.168.187.139"
 (2)子网掩码（固定）：NETMASK="255.255.255.0"

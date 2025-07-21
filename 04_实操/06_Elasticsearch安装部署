@@ -1,0 +1,39 @@
+// Elasticsearch安装部署
+
+1.导入仓库秘钥：
+    rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+
+2.添加仓库配置文件
+    1)添加文件：
+        vim /etc/yum.repos.d/elasticsearch.repo
+    2)添加配置信息：
+        [elasticsearch-7.x]
+        name=Elasticsearch repository for 7.x packages
+        baseurl=https://artifacts.elastic.co/packages/7.x/yum
+        gpgcheck=1
+        gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+        enabled=1
+        autorefresh=1
+        type=rpm-md
+    3)更新yum缓存：
+        yum makecache
+
+3.安装Elasticsearch：
+    yum install elasticsearch
+
+4.配置es：
+    1)添加配置文件：
+        vim /etc/elasticsearch/elasticsearch.yml
+    2)编辑配置信息：
+        cluster.name: my-cluster    # 设置集群名称
+        node.name: node-1   # 设置节点名称
+        network.host: 0.0.0.0   # 允许外网访问
+        cluster.initial_master_nodes: ["node-1"]    # 配置集群master节点
+
+5.启动es：
+    systemctl start elasticsearch
+    systemctl enable elasticsearch
+
+6.开启外部访问：
+    firewall-cmd --add-port=9200/tcp --permanent
+    firewall-cmd --reload
