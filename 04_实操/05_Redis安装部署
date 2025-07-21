@@ -13,3 +13,6 @@
 4.放行redis使用的6379端口：
     firewall-cmd --add-port=6379/tcp --permanent
     firewall-cmd --reload
+
+5.进入redis服务：
+    redis-cli
