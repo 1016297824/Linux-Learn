@@ -1,0 +1,15 @@
+// Redis安装部署
+
+1.配置EPEL仓库：
+    yum install epel-release
+
+2.安装redis
+    yum install redis
+
+3.启动redis
+    systemctl start redis
+    systemctl enable redis
+
+4.放行redis使用的6379端口：
+    firewall-cmd --add-port=6379/tcp --permanent
+    firewall-cmd --reload

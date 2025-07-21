@@ -1,0 +1,89 @@
+// RabbitMQ安装部署
+
+1.准备yum仓库：
+(1)准备gpgkey秘钥：
+    rpm --import https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    rpm --import https://packagecloud.io/rabbitmq/erlang/gpgkey
+    rpm --import https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
+(2)新建仓库文件：
+    vim /etc/yum.repos.d/rabbitmq.repo
+(3)写入配置信息：
+    ##
+    ##  Zero dependency Erlang
+    ##
+    [rabbitmq_erlang]
+    name=rabbitmq_erlang
+    baseurl=https://packagecloud.io/rabbitmq/erlang/el/7/$basearch
+    repo_gpgcheck=1
+    gpgcheck=1
+    enabled=1
+
+    # PackageCloud's repository key and RabbitMQ package signing key
+    gpgkey=	https://packagecloud.io/rabbitmq/erlang/gpgkey
+    	https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    sslverify=1
+    sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire=300
+
+    [rabbitmq_erlang-source]
+    name=rabbitmq_erlang-sourc
+    baseurl=https://packagecloud.io/rabbitmq/erlang/el/7/SRPMS
+    repo_gpgcheck=1
+    gpgcheck=0
+    enabled=1
+
+    # PackageCloud's repository key and RabbitMQ package signing key
+    gpgkey=	https://packagecloud.io/rabbitmq/erlang/gpgkey
+    	https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    sslverify=1
+    sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire=300
+
+    ##
+    ## RabbitMQ server
+    ##
+    [rabbitmq_server]
+    name=rabbitmq_server
+    baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/7/$basearch
+    repo_gpgcheck=1
+    gpgcheck=0
+    enabled=1
+
+    # PackageCloud's repository key and RabbitMQ package signing key
+    gpgkey=	https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
+    	https://github.com/rabbitmq/signing-keys/releases/download/2.0/rabbitmq-release-signing-key.asc
+    sslverify=1
+    sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire=300
+
+    [rabbitmq_server-source]
+    name=rabbitmq_server-sourc
+    baseurl=https://packagecloud.io/rabbitmq/rabbitmq-server/el/7/SRPMS
+    repo_gpgcheck=1
+    gpgcheck=0
+    enabled=1
+    gpgkey=https://packagecloud.io/rabbitmq/rabbitmq-server/gpgkey
+    sslverify=1
+    sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+    metadata_expire=300
+
+2.安装RabbitMQ
+    yum install erlang rabbitmq-server
+
+3.启动RabbitMQ
+    systemctl start rabbitmq-server
+    systemctl enable rabbitmq-server
+
+4.开放RabbitMQ使用的5672、15672、25672端口：
+    firewall-cmd --add-port=5672/tcp --permanent
+    firewall-cmd --add-port=15672/tcp --permanent
+    firewall-cmd --add-port=25672/tcp --permanent
+    firewall-cmd --reload
+
+5.启动RabbitMQ的WEB管理控制台：
+    rabbitmq-plugins enable rabbitmq_management
+
+6.添加[admin]用户，并赋予权限：
+    rabbitmqctl add_user [用户名] '密码'
+    rabbitmqctl set_permissions -p "/" "admin" ".*" ".*" ".*"
+    rabbitmqctl set_user_tags admin administrator

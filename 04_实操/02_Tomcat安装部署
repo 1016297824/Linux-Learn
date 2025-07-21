@@ -57,3 +57,26 @@
     2)方法2：开启8080端口外部访问
         firewall-cmd --add-port=8080/tcp --permanent
         firewall-cmd --reload
+(8)配置Tomcat开机自启：
+    1)新建tomcat.service服务文件：
+        vim /etc/systemd/system/tomcat.service
+    2)添加服务配置信息：
+        [Unit]
+        Description=Apache Tomcat Web Application Container
+        After=network.target
+
+        [Service]
+        Type=forking
+        User=tomcat
+        Group=tomcat
+        ExecStart=[tomcat链接目录/tomcat安装目录]/bin/startup.sh
+        ExecStop=[tomcat链接目录/tomcat安装目录]/bin/shutdown.sh
+        Restart=on-abnormal
+
+        [Install]
+        WantedBy=multi-user.target
+    3)重新加载systemd配置：
+        systemctl daemon-reload
+    4)启动服务并设置开机自启：
+        systemctl start tomcat.service
+        systemctl enable tomcat.service
