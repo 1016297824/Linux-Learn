@@ -1,0 +1,44 @@
+// Nginx安装部署
+
+1.安装yum依赖
+    yum install yum-utils
+
+2.添加Nginx的yum仓库
+(1)创建Nginx配置文件
+    vim /etc/yum.repos.d/nginx.repo
+(2)填入配置信息
+    [nginx-stable]
+    name=nginx stable repo
+    baseurl=http://nginx.org/packages/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=1
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+
+    [nginx-mainline]
+    name=nginx mainline repo
+    baseurl=http://nginx.org/packages/mainline/centos/$releasever/$basearch/
+    gpgcheck=1
+    enabled=0
+    gpgkey=https://nginx.org/keys/nginx_signing.key
+    module_hotfixes=true
+3.通过yum安装最新稳定版的nginx：
+    yum install nginx
+4.启动Nginx服务
+    1)启动：
+        systemctl start nginx
+    2)停止：
+        systemctl stop nginx
+    3)查看运行状态：
+        systemctl status nginx
+    4)开机自启：
+        systemctl enable nginx
+    5)关闭开机自启：
+        systemctl disable nginx
+5.配置防火墙放行：
+(1)方式1，关闭防火墙：
+    systemctl stop firewalld
+    systemctl disable firewalld
+(2)方式2，放行80端口：
+    firewall-cmd --add-port=80/tcp --permanent
+    firewall-cmd reload

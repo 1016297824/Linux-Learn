@@ -59,3 +59,15 @@ SELECT User,Host FROM mysql.user;
         sudo -i
         mount -o remount -rw /
         mount -o remount -rw /var/snap/firefox/common/host-hunspell
+
+5.远程连接放行
+(1)方法一：关闭防火墙
+    1)关闭：
+        systemctl stop firewalld
+    2)关闭开机自启：
+        systemctl disable firewalld
+(2)方法二：放行指定端口
+    1)放行tcp规则端口并设置永久生效：
+        firewall-cmd --add-port=80/tcp --permanent
+    2)重新加载防火墙：
+        firewall-cmd --reload
