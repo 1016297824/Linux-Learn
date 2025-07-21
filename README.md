@@ -68,6 +68,6 @@ SELECT User,Host FROM mysql.user;
         systemctl disable firewalld
 (2)方法二：放行指定端口
     1)放行tcp规则端口并设置永久生效：
-        firewall-cmd --add-port=80/tcp --permanent
+        firewall-cmd --add-port=[端口号]/tcp --permanent
     2)重新加载防火墙：
         firewall-cmd --reload
