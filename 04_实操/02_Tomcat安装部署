@@ -8,13 +8,13 @@
 (3)配置JDK软链接：
     ln -s [JDK环境目录/JDK文件夹] [链接目录]
 (4)配置JAVA_HOME环境变量：
-    1)编辑/etc/protfile文件：
-        vim /etc/protfile
+    1)编辑/etc/profile文件：
+        vim /etc/profile
     2)添加路径：
         export JAVA_HOME=[链接目录]
         export PATH=$PATH:$JAVA_HOME/bin
     3)生效环境变量
-        source /etc/protfile
+        source /etc/profile
 (5)替代系统自带的java：
     1)删除系统自带的java：
         rm -f /usr/bin/java
@@ -33,8 +33,10 @@
         passwd tomcat
 (2)下载Tomcat安装包：
     1)下载命令：
+        wget https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.27/bin/apache-tomcat-10.0.27.tar.gz
         wget https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.43/bin/apache-tomcat-10.1.43.tar.gz
     2)下载报错改用一下命令：
+        wget --no-check-certificate https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.27/bin/apache-tomcat-10.0.27.tar.gz
         wget --no-check-certificate https://dlcdn.apache.org/tomcat/tomcat-10/v10.1.43/bin/apache-tomcat-10.1.43.tar.gz
 (3)解压Tomcat安装文件：
     tar -zxvf [Tomcat压缩文件] -C [Tomcat环境目录]

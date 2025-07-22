@@ -1,0 +1,75 @@
+// Zookeeper安装部署
+
+1.下载配置：
+(1)下载命令：
+    wget http://archive.apache.org/dist/zookeeper/zookeeper-3.5.9/apache-zookeeper-3.5.9-bin.tar.gz
+(2)解压：
+    tar -zxvf apache-zookeeper-3.5.9-bin.tar.gz -C /export/server
+(3)创建软链接：
+    ln -s /export/server/apache-zookeeper-3.5.9-bin /export/server/zookeeper
+(4)修改配置文件：
+    1)打开文件：
+        vim /export/server/zookeeper/conf/zoo.cfg
+    2)写入配置信息：
+        tickTime=2000
+        # zookeeper数据存储目录
+        dataDir=/export/server/zookeeper/data
+        clientPort=2181
+        initLimit=5
+        syncLimit=2
+        server.1=node1:2888:3888
+        server.2=node2:2888:3888
+        server.3=node3:2888:3888
+(5)配置myid：
+    1)创建Zookeeper的数据目录
+        mkdir /export/server/zookeeper/data
+    2)创建文件，并填入id：node1填入1，node2填入2，node3填入3（与配置文件中的server对应）
+        vim /export/server/zookeeper/data/myid
+(6)启动Zookeeper（启动前要开放端口）：
+    /export/server/zookeeper/bin/zkServer.sh start
+(7)检查是否启动
+    jps
+(8)验证Zookeeper：
+    1)启动三台虚拟机中的Zookeeper
+    2)启动zkCli：
+        /export/server/zookeeper/bin/zkCli.sh
+    3)输入命令：
+        ls /
+
+2.配置开机自启：
+(1)添加用户：
+    useradd zookeeper
+    passwd
+(2)修改Zookeeper权限：
+    chown -R zookeeper:zookeeper [zookeeper]
+    chown -R zookeeper:zookeeper [安装目录]
+(3)创建一个新的服务文件
+    vim /etc/systemd/system/zookeeper.service
+(4)添加服务配置信息：
+    [Unit]
+    Description=ZooKeeper Service
+    After=network.target
+    
+    [Service]
+    Type=forking
+    User=zookeeper
+    Group=zookeeper
+    ExecStart=/export/server/zookeeper/bin/zkServer.sh start
+    ExecStop=/export/server/zookeeper/bin/zkServer.sh stop
+    ExecReload=/export/server/zookeeper/bin/zkServer.sh restart
+    Restart=on-failure
+    WorkingDirectory=/export/server/zookeeper
+    Environment="ZOO_LOG_DIR=/export/server/zookeeper/logs"
+    
+    [Install]
+    WantedBy=multi-user.target
+(5)重新加载守护进程，启动Zookeeper服务
+    systemctl daemon-reload
+    systemctl start zookeeper.service
+    systemctl enable zookeeper.service
+
+3.开放Zookeeper端口：2181,2888,3888
+    firewall-cmd --add-port=2181/tcp --permanent
+    firewall-cmd --add-port=2888/tcp --permanent
+    firewall-cmd --add-port=3888/tcp --permanent
+    firewall-cmd --reload

@@ -1,0 +1,20 @@
+// scp命令
+
+1.scp命令：通过SSH协议完成文件复制
+(1)语法：scp [-r] [参数1] [参数2]
+    将参数1复制到参数2
+(2)选项：
+    1)-r:用于复制文件夹
+(3)参数：
+    1)参数1：本机路径 或 远程路径
+    2)参数2：本机目标路径 或 远程目标路径
+(4)例子：
+    scp -r /export/server/jdk root@node2:/export/server/
+    scp -r node2:/export/server/jdk /export/server/
+
+2.scp命令高级用法：
+(1)将本机当前路径的文件夹，复制到node2服务器的同名路径下
+    例：
+    cd /export/server
+    scp -r jdk node2:`pwd`/
+    scp -r jdk node2:$PWD

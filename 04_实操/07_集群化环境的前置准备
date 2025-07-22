@@ -1,2 +1,30 @@
 // 集群化环境的前置准备
 
+1.虚拟机准备
+(1)克隆三台虚拟机
+(2)修改每个虚拟机的固定IP
+(3)分别添加主机名映射：node1,node2,node3
+
+2.配置SSH免密登录：
+(1)正常登录：
+    ssh [用户名]@[IP地址/映射名]
+    注意：不写用户名则默认使用root用户
+(2)配置SSH免密：
+    1)创建秘钥：在每一台机器执行一下代码，并回车到底：
+        ssh-keygen -t rsa -b 4096
+    2)在每一台机器执行：
+        ssh-copy-id node1
+        ssh-copy-id node2
+        ssh-copy-id node3
+    执行完毕后三台虚拟机将实现root用户互通
+
+3.关闭防火墙和SELinux
+    方便集群化软件之间通过端口互相通讯
+(1)关闭防火墙：
+    systemctl stop firewalld
+    systemctl disable firewalld
+(2)关闭ESLinux安全模块：
+    1)打开配置文件：
+        vim /etc/sysconfig/selinux
+    2)修改一下配置：
+        SELINUX: enforcing -> disabled
