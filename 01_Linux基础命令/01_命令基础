@@ -36,3 +36,12 @@
 
 8.修改主机名：
     hostnamectl set-hostname [新主机名]
+
+9.查看服务日志
+(1)日志配置：在服务配置文件中添加如下代码
+    # 日志配置
+    StandardOutput=journal
+    StandardError=journal
+    SyslogIdentifier=[服务名]
+(2)查看命令：其中[-f]表示实时输出
+    journalctl -u [服务名] -f

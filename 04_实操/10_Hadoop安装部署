@@ -1,0 +1,136 @@
+// Hadoop安装部署
+
+1.Hadoop安装：
+(1)下载
+    wget http://archive.apache.org/dist/hadoop/common/hadoop-3.3.0/hadoop-3.3.0.tar.gz 
+(2)解压
+    tar -zxvf hadoop-3.3.0.tar.gz -C /export/server/
+(3)创建软链接
+    ln -s /export/server/hadoop-3.3.0 /export/server/hadoop
+
+2.修改Hadoop配置文件1：hadoop-env.sh
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/hadoop-env.sh
+(2)编辑配置信息：在文件开头加入
+    # 配置Java安装路径
+    export JAVA_HOME=/export/server/jdk
+    # 配置Hadoop安装路径
+    export HADOOP_HOME=/export/server/hadoop
+    # Hadoop hdfs配置文件路径
+    export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
+    # Hadoop YARN配置文件路径
+    export YARN_CONF_DIR=$HADOOP_HOME/etc/hadoop
+    # Hadoop YARN 日志文件夹
+    export YARN_LOG_DIR=$HADOOP_HOME/logs/yarn
+    # Hadoop hdfs 日志文件夹
+    export HADOOP_LOG_DIR=$HADOOP_HOME/logs/hdfs
+    # Hadoop的使用启动用户配置
+    export HDFS_NAMENODE_USER=root
+    export HDFS_DATANODE_USER=root
+    export HDFS_SECONDARYNAMENODE_USER=root
+    export YARN_RESOURCEMANAGER_USER=root
+    export YARN_NODEMANAGER_USER=root
+    export YARN_PROXYSERVER_USER=root
+
+3.修改Hadoop配置文件2：core-site.xml
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/core-site.xml
+(2)编辑配置信息：清空配置，填入如下内容
+    <configuration>
+        <property>
+            <name>fs.defaultFS</name>
+            <value>hdfs://node1:8020</value>
+            <description></description>
+        </property>
+        <property>
+            <name>io.file.buffer.size</name>
+            <value>131072</value>
+            <description></description>
+        </property>
+    </configuration>
+4.修改Hadoop配置文件3：hdfs-site.xml
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/hdfs-site.xml
+(2)编辑配置信息：清空配置，填入如下内容
+    <configuration>
+        <property>
+            <name>dfs.datanode.data.dir.perm</name>
+            <value>700</value>
+        </property>
+      <property>
+        <name>dfs.namenode.name.dir</name>
+        <value>/data/nn</value>
+        <description>Path on the local filesystem where the NameNode stores the namespace and transactions logs persistently.</description>
+      </property>
+      <property>
+        <name>dfs.namenode.hosts</name>
+        <value>node1,node2,node3</value>
+        <description>List of permitted DataNodes.</description>
+      </property>
+      <property>
+        <name>dfs.blocksize</name>
+        <value>268435456</value>
+        <description></description>
+      </property>
+      <property>
+        <name>dfs.namenode.handler.count</name>
+        <value>100</value>
+        <description></description>
+      </property>
+      <property>
+        <name>dfs.datanode.data.dir</name>
+        <value>/data/dn</value>
+      </property>
+    </configuration>
+
+5.修改Hadoop配置文件4：mapred-env.sh
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/mapred-env.sh
+(2)编辑配置信息：在文件的开头加入如下环境变量设置
+    export JAVA_HOME=/export/server/jdk
+    export HADOOP_JOB_HISTORYSERVER_HEAPSIZE=1000
+    export HADOOP_MAPRED_ROOT_LOGGER=INFO,RFA
+
+6.修改Hadoop配置文件5：mapred-site.xml
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/mapred-site.xml
+(2)编辑配置信息：清空配置，填入如下内容
+    <configuration>
+        <property>
+            <name>mapreduce.framework.name</name>
+            <value>yarn</value>
+            <description></description>
+        </property>
+        <property>
+            <name>mapreduce.jobhistory.address</name>
+            <value>node1:10020</value>
+            <description></description>
+        </property>
+        <property>
+            <name>mapreduce.jobhistory.webapp.address</name>
+            <value>node1:19888</value>
+            <description></description>
+        </property>
+        <property>
+            <name>mapreduce.jobhistory.intermediate-done-dir</name>
+            <value>/data/mr-history/tmp</value>
+            <description></description>
+        </property>
+        <property>
+            <name>mapreduce.jobhistory.done-dir</name>
+            <value>/data/mr-history/done</value>
+            <description></description>
+        </property>
+        <property>
+            <name>yarn.app.mapreduce.am.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+        </property>
+        <property>
+            <name>mapreduce.map.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+        </property>
+        <property>
+            <name>mapreduce.reduce.env</name>
+            <value>HADOOP_MAPRED_HOME=$HADOOP_HOME</value>
+        </property>
+    </configuration>

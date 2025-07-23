@@ -1,0 +1,88 @@
+// Kafka安装部署
+
+1.安装
+    注意：Kafka运行依赖JDK环境和Kafka
+(1)下载安装包：
+    wget http://archive.apache.org/dist/kafka/2.4.1/kafka_2.12-2.4.1.tgz
+(2)解压：
+    tar -zxvf kafka_2.12-2.4.1.tgz -C /export/server/
+(3)创建软链接：
+    ln -s /export/server/kafka_2.12-2.4.1 /export/server/kafka
+(4)修改Kafka配置文件
+    1)打开配置文件
+        vim /export/server/kafka/config/server.properties
+    2)修改配置信息（以node1为例）：
+        # 指定broker的id（每个虚拟机不一样）
+        broker.id=1
+        # 指定 kafka的绑定监听的地址（每个虚拟机不一样）
+        listeners=PLAINTEXT://node1:9092
+        # 指定Kafka数据的位置
+        log.dirs=/export/server/kafka/data
+        # 指定Kafka的三个节点
+        kafka.connect=node1:2181,node2:2181,node3:2181
+(5)将Kafka复制到三台虚拟机，并修改配置信息
+    cd /export/server
+    scp -r kafka_2.12-2.4.1 node2:`pwd`/
+    scp -r kafka_2.12-2.4.1 node3:$PWD
+
+2.开放端口（9092）：
+    firewall-cmd --add-port=9092/tcp --permanent
+    firewall-cmd --reload
+
+3.启动Kafka
+(1)方式一：前台启动
+    /export/server/kafka/bin/kafka-server-start.sh /export/server/kafka/config/server.properties
+(2)方式二：后台启动
+    nohup /export/server/kafka/bin/kafka-server-start.sh /export/server/kafka/config/server.properties 2>&1 >> /export/server/kafka/kafka-server.log &
+(3)验证启动
+    jps
+    输出：带 Kafka
+
+4.测试Kafka能否正常使用
+(1)创建测试主题
+    /export/server/kafka_2.12-2.4.1/bin/kafka-topics.sh --create --kafka node1:2181 --replication-factor 1 --partitions 3 --topic test
+(2)打开一个终端页面，启动一个模拟的数据生产者
+    /export/server/kafka_2.12-2.4.1/bin/kafka-console-producer.sh --broker-list node1:9092 --topic test
+(3)再打开一个新的终端页面，在启动一个模拟的数据消费者
+    /export/server/kafka_2.12-2.4.1/bin/kafka-console-consumer.sh --bootstrap-server node1:9092 --topic test --from-beginning
+
+5.配置开机自启：
+(1)添加用户：
+    useradd kafka
+    passwd
+(2)修改Kafka权限：
+    chown -R kafka:kafka [kafka]
+    chown -R kafka:kafka [安装目录]
+(3)创建一个新的服务文件
+    vim /etc/systemd/system/kafka.service
+(4)添加服务配置信息：
+    [Unit]
+    Description=AKafka Server
+    Requires=zookeeper.service
+    After=zookeeper.service
+
+    [Service]
+    Type=simple
+    User=kafka
+    Group=kafka
+    Environment="JAVA_HOME=/export/server/jdk"
+    Environment="KAFKA_HEAP_OPTS=-Xmx1G -Xms1G"
+    Environment="KAFKA_LOG4J_OPTS=-Dlog4j.configuration=file:/export/server/kafka/config/log4j.properties"
+    Environment="KAFKA_HOME=/export/server/kafka"
+    Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+    ExecStart=/export/server/kafka/bin/kafka-server-start.sh /export/server/kafka/config/server.properties
+    ExecStop=/export/server/kafka/bin/kafka-server-stop.sh
+    Restart=on-failure
+    RestartSec=10
+
+    # 日志配置
+    StandardOutput=journal
+    StandardError=journal
+    SyslogIdentifier=kafka
+
+    [Install]
+    WantedBy=multi-user.target
+(5)重新加载守护进程，启动Kafka服务
+    systemctl daemon-reload
+    systemctl start kafka.service
+    systemctl enable kafka.service

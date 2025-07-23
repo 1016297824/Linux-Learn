@@ -28,7 +28,7 @@
 (6)启动Zookeeper（启动前要开放端口）：
     /export/server/zookeeper/bin/zkServer.sh start
 (7)检查是否启动
-    jps
+    jps -> 输出带 QuorumPeerMain
 (8)验证Zookeeper：
     1)启动三台虚拟机中的Zookeeper
     2)启动zkCli：
