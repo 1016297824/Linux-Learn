@@ -1,7 +1,7 @@
 // Kafka安装部署
 
 1.安装
-    注意：Kafka运行依赖JDK环境和Kafka
+    注意：Kafka运行依赖JDK环境和Zookeeper
 (1)下载安装包：
     wget http://archive.apache.org/dist/kafka/2.4.1/kafka_2.12-2.4.1.tgz
 (2)解压：

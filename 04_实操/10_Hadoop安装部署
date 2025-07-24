@@ -48,6 +48,7 @@
             <description></description>
         </property>
     </configuration>
+
 4.修改Hadoop配置文件3：hdfs-site.xml
 (1)打开配置文件    
     vim /export/server/hadoop/etc/hadoop/hdfs-site.xml
@@ -202,3 +203,85 @@
             <description>Shuffle service that needs to be set for Map Reduce applications.</description>
         </property>
     </configuration>
+
+9.修改Hadoop配置文件8：workers
+(1)打开配置文件    
+    vim /export/server/hadoop/etc/hadoop/workers
+(2)编辑配置信息：全部内容如下
+    node1
+    node2
+    node3
+
+10.将Hadoop复制到其它机器，并创建软链接
+    cd /export/server
+    scp -r hadoop-3.3.0 node2:`pwd`/
+    scp -r hadoop-3.3.0 node3:`pwd`/
+
+11.在node1执行
+    mkdir -p /data/nn
+    mkdir -p /data/dn
+    mkdir -p /data/nm-log
+    mkdir -p /data/nm-local
+
+12.在node2，node3执行
+    mkdir -p /data/dn
+    mkdir -p /data/nm-log
+    mkdir -p /data/nm-local
+
+13.修改node1,node2,node3环境变量
+(1)打开环境变量文件
+    vim /etc/profile
+(2)加入一下内容
+    export HADOOP_HOME=/export/server/hadoop
+    export PATH=$PATH:$HADOOP_HOME/bin:$HADOOP_HOME/sbin
+(3)刷新生效
+    source /etc/profile
+
+14.启动：由于SSH免密登录，node1会启动node2,node3的Hadoop
+(1)格式化Namenode，在node1执行
+    hadoop namenode -format
+(2)启动hadoop的hdfs集群，在node1执行
+    start-dfs.sh
+(3)启动hadoop的yarn集群，在node1执行
+    start-yarn.sh
+(4)启动历史服务器，在node1执行
+    mapred --daemon start historyserver
+(5)启动web代理服务器，在node1执行
+    yarn-daemon.sh start proxyserver
+
+15.验证Hadoop运行情况
+(1)在node1、node2、node3上通过jps验证进程是否都启动成功
+    1)在node1中可以看到如下进程
+        NameNode
+        DataNode
+        NodeManager
+        ResourceManager
+        WebAppProxyServer
+        JobHistoryServer
+    2)在node2,node3中可以看到如下进程
+        DataNode
+        NodeManager
+(2)验证HDFS，浏览器打开：http: node1:9870
+    1)创建文件test.txt，随意填入内容，并执行：
+        hadoop fs -put test.txt /test
+        hadoop fs -cat /test
+(3)验证YARN，浏览器打开：http: node1:8088
+    1)创建文件words.txt，填入如下内容
+        zhangkun itcast hadoop
+        zhangkun hadoop hadoop
+        zhangkun itcast
+    2)将文件上传到HDFS中
+        hadoop fs -put words.txt /words
+    3)执行如下命令验证YARN是否正常
+        hadoop jar /export/server/hadoop/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.3.0.jar wordcount -Dmapred.job.queue.name=root.root /words /output
+
+16.开放端口
+    firewall-cmd --add-port=[端口号]/tcp --permanent
+    firewall-cmd --reload
+(1)node1端口详解：9870,8088，8020,8030
+    1)9870:HDFS查看端口
+    2)8088:YARN查看端口
+    3)8020:此端为NameNode(RPC)端口，在core-site.xml配置文件中，每台服务器要设置相同（默认为8020）
+    4)8030:此端为ResourceManager(RPC)端口，在yarn-site.xml配置文件中，每台服务器要设置相同（默认为8030）
+(2)node2,node3端口详解：9866
+    1)9866:DataNode的默认数据传输端口
