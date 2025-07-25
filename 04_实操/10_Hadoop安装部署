@@ -153,6 +153,10 @@
 (2)编辑配置信息：在文件开头，填入如下内容
     <configuration>
         <property>
+            <name>yarn.nodemanager.address</name>
+            <value>0.0.0.0:8041</value>
+        </property>
+        <property>
             <name>yarn.log.server.url</name>
             <value>http://node1:19888/jobhistory/logs</value>
             <description></description>
@@ -201,10 +205,6 @@
             <name>yarn.nodemanager.aux-services</name>
             <value>mapreduce_shuffle</value>
             <description>Shuffle service that needs to be set for Map Reduce applications.</description>
-        </property>
-        <property>
-            <name>yarn.nodemanager.address</name>
-            <value>0.0.0.0:8041</value>
         </property>
     </configuration>
 
@@ -290,3 +290,101 @@
 (2)node2,node3端口详解：9866,8041
     1)9866:DataNode的默认数据传输端口
     2)8041:自定义端口，该配置项定义了 NodeManager 服务监听的地址和端口
+
+17.创建包装脚本
+(1)创建一个新的启动脚本：start-hadoop-customer.sh
+    #!/bin/bash
+
+    # 获取Hadoop主目录
+    HADOOP_HOME=$(dirname $(dirname $(readlink -f $0)))
+
+    # 启动HDFS
+    echo "Starting HDFS..."
+    $HADOOP_HOME/sbin/start-dfs.sh
+
+    # 启动YARN
+    echo "Starting YARN..."
+    $HADOOP_HOME/sbin/start-yarn.sh
+
+    # 启动History Server
+    echo "Starting MapReduce History Server..."
+    $HADOOP_HOME/bin/mapred --daemon start historyserver
+
+    if [ $? -eq 0 ]; then
+      echo "MapReduce History Server started successfully"
+    else
+      echo "Failed to start MapReduce History Server"
+    fi
+
+    echo "Hadoop cluster with History Server started"
+(2)创建对应的停止脚本：stop-hadoop-customer.sh
+    #!/bin/bash
+
+    # 获取Hadoop主目录
+    HADOOP_HOME=$(dirname $(dirname $(readlink -f $0)))
+
+    # 停止History Server
+    echo "Stopping MapReduce History Server..."
+    $HADOOP_HOME/bin/mapred --daemon stop historyserver
+
+    # 停止YARN
+    echo "Stopping YARN..."
+    $HADOOP_HOME/sbin/stop-yarn.sh
+
+    # 停止HDFS
+    echo "Stopping HDFS..."
+    $HADOOP_HOME/sbin/stop-dfs.sh
+
+    echo "Hadoop cluster with History Server stopped"
+(3)给脚本添加执行权限
+    chmod +x start-hadoop-customer.sh
+    chmod +x stop-hadoop-customer.sh
+
+18.设置开机自启
+(1)创建hadoop用户并添加权限
+    adduser hadoop
+    passwd hadoop
+    chown -R hadoop:hadoop /export/server/hadoop/
+    chown -R hadoop:hadoop /export/server/hadoop-3.3.0/
+(2)主节点设置：/etc/systemd/system/hadoop-master.service
+    [Unit]
+    Description=Hadoop Master Services
+    After=network.target sshd.service
+    Wants=network.target
+
+    [Service]
+    Type=forking
+    User=hadoop
+    Group=hadoop
+    Environment="JAVA_HOME=/export/server/jdk"
+    Environment="HADOOP_HOME=/export/server/hadoop"
+    Environment="HADOOP_CONF_DIR=/export/server/hadoop/etc/hadoop"
+    ExecStart=/export/server/hadoop/sbin/start-hadoop-customer.sh
+    ExecStop=/export/server/hadoop/sbin/stop-hadoop-customer.sh
+    RemainAfterExit=yes
+    TimeoutSec=300
+    GuessMainPID=no
+
+    [Install]
+    WantedBy=multi-user.target
+(3)从节点设置：/etc/systemd/system/hadoop-slave.service
+    [Unit]
+    Description=Hadoop Slave Services
+    After=network.target sshd.service
+    Wants=network.target
+
+    [Service]
+    Type=forking
+    User=hadoop
+    Group=hadoop
+    Environment="JAVA_HOME=/export/server/jdk"
+    Environment="HADOOP_HOME=/export/server/hadoop"
+    Environment="HADOOP_CONF_DIR=/export/server/hadoop/etc/hadoop"
+    # 只启动从节点应该运行的服务
+    ExecStart=/bin/bash -c "$HADOOP_HOME/sbin/hadoop-daemon.sh start datanode && $HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager"
+    ExecStop=/bin/bash -c "$HADOOP_HOME/sbin/yarn-daemon.sh stop nodemanager && $HADOOP_HOME/sbin/hadoop-daemon.sh stop datanode"
+    RemainAfterExit=yes
+    TimeoutSec=300
+
+    [Install]
+    WantedBy=multi-user.target
