@@ -202,6 +202,10 @@
             <value>mapreduce_shuffle</value>
             <description>Shuffle service that needs to be set for Map Reduce applications.</description>
         </property>
+        <property>
+            <name>yarn.nodemanager.address</name>
+            <value>0.0.0.0:8041</value>
+        </property>
     </configuration>
 
 9.修改Hadoop配置文件8：workers
@@ -278,10 +282,11 @@
 16.开放端口
     firewall-cmd --add-port=[端口号]/tcp --permanent
     firewall-cmd --reload
-(1)node1端口详解：9870,8088，8020,8030
+(1)node1端口详解：9870,8088,8020,8030
     1)9870:HDFS查看端口
     2)8088:YARN查看端口
     3)8020:此端为NameNode(RPC)端口，在core-site.xml配置文件中，每台服务器要设置相同（默认为8020）
     4)8030:此端为ResourceManager(RPC)端口，在yarn-site.xml配置文件中，每台服务器要设置相同（默认为8030）
-(2)node2,node3端口详解：9866
+(2)node2,node3端口详解：9866,8041
     1)9866:DataNode的默认数据传输端口
+    2)8041:自定义端口，该配置项定义了 NodeManager 服务监听的地址和端口
