@@ -342,10 +342,12 @@
 
 18.设置开机自启
 (1)创建hadoop用户并添加权限
-    adduser hadoop
+    useradd hadoop
     passwd hadoop
-    chown -R hadoop:hadoop /export/server/hadoop/
+    chown -R hadoop:hadoop /export/server/hadoop
     chown -R hadoop:hadoop /export/server/hadoop-3.3.0/
+    chown -R hadoop:hadoop /data
+    注意：更改hadoop-env.sh中的用户启动权限
 (2)主节点设置：/etc/systemd/system/hadoop-master.service
     [Unit]
     Description=Hadoop Master Services
@@ -367,7 +369,11 @@
 
     [Install]
     WantedBy=multi-user.target
-(3)从节点设置：/etc/systemd/system/hadoop-slave.service
+(3)主节点启动服务
+    systemctl daemon-reload
+    systemctl start hadoop-master.service
+    systemctl enable hadoop-master.service
+(4)从节点设置：/etc/systemd/system/hadoop-slave.service
     [Unit]
     Description=Hadoop Slave Services
     After=network.target sshd.service
@@ -381,10 +387,15 @@
     Environment="HADOOP_HOME=/export/server/hadoop"
     Environment="HADOOP_CONF_DIR=/export/server/hadoop/etc/hadoop"
     # 只启动从节点应该运行的服务
-    ExecStart=/bin/bash -c "$HADOOP_HOME/sbin/hadoop-daemon.sh start datanode && $HADOOP_HOME/sbin/yarn-daemon.sh start nodemanager"
-    ExecStop=/bin/bash -c "$HADOOP_HOME/sbin/yarn-daemon.sh stop nodemanager && $HADOOP_HOME/sbin/hadoop-daemon.sh stop datanode"
+    ExecStartPre=/bin/bash -c 'echo "HADOOP_HOME=$HADOOP_HOME"'
+    ExecStart=/bin/bash -c "${HADOOP_HOME}/bin/hdfs --daemon start datanode && ${HADOOP_HOME}/bin/yarn --daemon start nodemanager"
+    ExecStop=/bin/bash -c "${HADOOP_HOME}/bin/yarn --daemon stop nodemanager && ${HADOOP_HOME}/bin/hdfs --daemon stop datanode"
     RemainAfterExit=yes
     TimeoutSec=300
 
     [Install]
     WantedBy=multi-user.target
+(5)从节点启动服务
+    systemctl daemon-reload
+    systemctl start hadoop-slave.service
+    systemctl enable hadoop-slave.service

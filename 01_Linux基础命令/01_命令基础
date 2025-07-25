@@ -45,3 +45,4 @@
     SyslogIdentifier=[服务名]
 (2)查看命令：其中[-f]表示实时输出
     journalctl -u [服务名] -f
+    journalctl -xe
