@@ -113,17 +113,21 @@
 (2)主节点设置：/etc/systemd/system/hbase-master.service
     [Unit]
     Description=HBase Master
-    After=network.target hadoop-hdfs-namenode.service zookeeper.service
+    After=network.target hadoop-master.service zookeeper.service
+    Wants=hadoop-master.service zookeeper.service
 
     [Service]
     Type=forking
+    RemainAfterExit=yes
     User=hbase
     Group=hbase
     Environment="JAVA_HOME=/export/server/jdk"
     Environment="HBASE_HOME=/export/server/hbase"
-    ExecStart=/export/server/hbase/bin/start-hbase.sh
-    ExecStop=/export/server/hbase/bin/stop-hbase.sh
+    ExecStart=/bin/bash -c '/export/server/hbase/bin/start-hbase.sh'
+    ExecStop=/bin/bash -c '/export/server/hbase/bin/stop-hbase.sh'
     RemainAfterExit=yes
+    Restart=on-failure
+    RestartSec=10
 
     [Install]
     WantedBy=multi-user.target
@@ -134,7 +138,7 @@
 (4)从节点设置：/etc/systemd/system/hbase-regionserver.service
     [Unit]
     Description=HBase RegionServer
-    After=network.target hbase-master.service
+    After=network.target hadoop-slave.service zookeeper.service
 
     [Service]
     Type=forking
@@ -145,6 +149,8 @@
     ExecStart=/export/server/hbase/bin/hbase-daemon.sh start regionserver
     ExecStop=/export/server/hbase/bin/hbase-daemon.sh stop regionserver
     RemainAfterExit=yes
+    Restart=on-failure
+    RestartSec=10
 
     [Install]
     WantedBy=multi-user.target
@@ -152,6 +158,3 @@
     systemctl daemon-reload
     systemctl start hbase-regionserver.service
     systemctl enable hbase-regionserver.service
-
-11.其它问题
-(1)权限问题，将hbase用户添加到zookeeper用户组，并将myid文件权限设置为664

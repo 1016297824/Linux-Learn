@@ -60,6 +60,8 @@
     Restart=on-failure
     WorkingDirectory=/export/server/zookeeper
     Environment="ZOO_LOG_DIR=/export/server/zookeeper/logs"
+    Restart=on-failure
+    RestartSec=10
     
     [Install]
     WantedBy=multi-user.target
@@ -73,3 +75,6 @@
     firewall-cmd --add-port=2888/tcp --permanent
     firewall-cmd --add-port=3888/tcp --permanent
     firewall-cmd --reload
+
+4.查看zookeeper完整日志
+    journalctl -u zookeeper.service --no-pager -n 50

@@ -366,6 +366,8 @@
     RemainAfterExit=yes
     TimeoutSec=300
     GuessMainPID=no
+    Restart=on-failure
+    RestartSec=10
 
     [Install]
     WantedBy=multi-user.target
@@ -392,6 +394,8 @@
     ExecStop=/bin/bash -c "${HADOOP_HOME}/bin/yarn --daemon stop nodemanager && ${HADOOP_HOME}/bin/hdfs --daemon stop datanode"
     RemainAfterExit=yes
     TimeoutSec=300
+    Restart=on-failure
+    RestartSec=10
 
     [Install]
     WantedBy=multi-user.target
