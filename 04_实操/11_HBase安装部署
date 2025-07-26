@@ -1,0 +1,157 @@
+// HBase安装部署
+
+1.依赖
+    Zookeeper,JDK,Hadoop(HDFS)
+
+2.安装
+(1)下载
+    wget http://archive.apache.org/dist/hbase/2.1.0/hbase-2.1.0-bin.tar.gz
+(2)解压
+    tar -zxvf hbase-2.1.0-bin.tar.gz -C /export/server
+(3)配置软链接
+    ln -s /export/server/hbase-2.1.0 /export/server/hbase
+
+3.修改配置文件
+(1)修改hbase-env.sh
+    vim /export/server/hbase/conf/hbase-env.sh
+    1)修改以下内容
+        export JAVA_HOME=/export/server/jdk
+        # 不使用HBase自带的Zookeeper，而是用独立
+        export HBASE_MANAGES_ZK=false
+        export HBASE_DISABLE_HADOOP_CLASSPATH_LOOKUP="true"
+(2)修改hbase-site.xml
+    vim /export/server/hbase/conf/hbase-site.xml
+    1)替换配置信息
+        <configuration>
+            <!-- HBase数据在HDFS中的存放的路径 -->
+            <property>
+                <name>hbase.rootdir</name>
+                <value>hdfs://node1:8020/hbase</value>
+            </property>
+
+            <!-- Hbase的运行模式。false是单机模式，true是分布式模式。若为false,Hbase和Zookeeper会运行在同一个JVM里面 -->
+            <property>
+                <name>hbase.cluster.distributed</name>
+                <value>true</value>
+            </property>
+
+            <!-- ZooKeeper的地址 -->
+            <property>
+                <name>hbase.zookeeper.quorum</name>
+                <value>node1,node2,node3</value>
+            </property>
+
+            <!-- ZooKeeper快照的存储位置 -->
+            <property>
+                <name>hbase.zookeeper.property.dataDir</name>
+                <value>/export/server/apache-zookeeper-3.5.9-bin/data</value>
+            </property>
+
+            <!-- V2.1版本，在分布式情况下, 设置为false -->
+            <property>
+                <name>hbase.unsafe.stream.capability.enforce</name>
+                <value>false</value>
+            </property>
+        </configuration>
+(3)修改regionservers
+    vim /export/server/hbase/conf/regionservers
+    1)填入配置信息
+        node1
+        node2
+        node3
+
+4.分发hbase到其它机器，并配置软链接
+    scp -r /export/server/hbase-2.1.0 node2:/export/server/
+    scp -r /export/server/hbase-2.1.0 node3:/export/server/
+
+5.配置环境变量（3台均配置）
+    vim /etc/profile
+(1)追加环境变量
+    export HBASE_HOME=/export/server/hbase
+    export PATH=$HBASE_HOME/bin:$PATH
+(2)刷新环境变量配置
+    source /etc/profile
+
+6.启动HBase
+    start-hbase.sh
+
+7.验证：
+(1)浏览器打开：http://node1:16010
+(2)jps验证
+    1)node1中出现进程：HMaster,HRegionServer
+    2)node2,node3中出现进程：HRegionServer
+
+8.测试：
+    hbase shell
+     # 创建表
+    create 'test', 'cf'
+     # 插入数据
+    put 'test', 'rk001', 'cf:info', 'itheima'
+     # 查询数据
+    get 'test', 'rk001'
+     # 扫描表数据
+    scan 'test'
+
+9.开放端口
+    firewall-cmd --add-port=[端口号]/tcp --permanent
+    firewall-cmd --reload
+(1)node1端口详解：16000,16010,16020,16030
+    1)16000:HBase Master RPC服务
+    2)16010:HBase Master Web管理界面
+    3)16020:RegionServer端口
+    4)16030:RegionServer RPC端口
+(2)node2,node3端口详解：16020,16030
+    1)16020:RegionServer端口
+    2)16030:RegionServer RPC端口
+
+10.设置开机自启
+(1)创建hbase用户并添加权限
+    useradd hbase
+    passwd hbase
+    chown -R hbase:hbase /export/server/hbase
+    chown -R hbase:hbase /export/server/hbase-2.1.0
+(2)主节点设置：/etc/systemd/system/hbase-master.service
+    [Unit]
+    Description=HBase Master
+    After=network.target hadoop-hdfs-namenode.service zookeeper.service
+
+    [Service]
+    Type=forking
+    User=hbase
+    Group=hbase
+    Environment="JAVA_HOME=/export/server/jdk"
+    Environment="HBASE_HOME=/export/server/hbase"
+    ExecStart=/export/server/hbase/bin/start-hbase.sh
+    ExecStop=/export/server/hbase/bin/stop-hbase.sh
+    RemainAfterExit=yes
+
+    [Install]
+    WantedBy=multi-user.target
+(3)主节点启动服务
+    systemctl daemon-reload
+    systemctl start hbase-master.service
+    systemctl enable hbase-master.service
+(4)从节点设置：/etc/systemd/system/hbase-regionserver.service
+    [Unit]
+    Description=HBase RegionServer
+    After=network.target hbase-master.service
+
+    [Service]
+    Type=forking
+    User=hbase
+    Group=hbase
+    Environment="JAVA_HOME=/export/server/jdk"
+    Environment="HBASE_HOME=/export/server/hbase"
+    ExecStart=/export/server/hbase/bin/hbase-daemon.sh start regionserver
+    ExecStop=/export/server/hbase/bin/hbase-daemon.sh stop regionserver
+    RemainAfterExit=yes
+
+    [Install]
+    WantedBy=multi-user.target
+(5)从节点启动服务
+    systemctl daemon-reload
+    systemctl start hbase-regionserver.service
+    systemctl enable hbase-regionserver.service
+
+11.其它问题
+(1)权限问题，将hbase用户添加到zookeeper用户组，并将myid文件权限设置为664
