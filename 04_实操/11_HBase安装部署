@@ -86,7 +86,7 @@
      # 创建表
     create 'test', 'cf'
      # 插入数据
-    put 'test', 'rk001', 'cf:info', 'itheima'
+    put 'test', 'rk001', 'cf:info', 'zhangkun'
      # 查询数据
     get 'test', 'rk001'
      # 扫描表数据
